@@ -1,0 +1,38 @@
+$max-width: 640;
+$min-width: 320;
+$max-width-px: 640px;
+$min-width-px: 320px;
+
+$sm-bar-height: 56px;
+$lg-bar-height: 64px;
+
+$g-black: #23232b;
+$g-bluegray: #2c3e50;
+$g-gray: #a6a6b6;
+$g-silver: #bcbcc9;
+
+@function vpx($px) {
+	@return ($px / $max-width) * 100vw;
+}
+
+@function rpx($px) {
+	@return ($px / 100) + rem;
+}
+
+@mixin sm-show {
+	@media (min-width: 320px) {
+		@content;
+	}
+}
+
+@mixin lg-show {
+	@media (min-width: 480px) {
+		@content;
+	}
+}
+
+@mixin ex-show {
+	@media (min-width: 640px) {
+		@content;
+	}
+}
