@@ -37,5 +37,9 @@ new Vue({
 			'setTitle'
 		])
 	},
-	render: h => h(App)
+	template: '<App/>',
+	components: {
+		App
+	}
+	// render: h => h(App)
 });
