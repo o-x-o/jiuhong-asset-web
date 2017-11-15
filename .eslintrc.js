@@ -75,6 +75,9 @@ module.exports = {
 		'no-mixed-operators': 1,
 		'no-plusplus': 1,
 		'no-param-reassign': 0,
-		'no-alert': 0
+		'no-alert': 0,
+		'no-console': 0,
+		'no-plusplus': 0,
+		'no-multi-assign': 0
 	}
 }
