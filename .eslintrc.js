@@ -78,6 +78,8 @@ module.exports = {
 		'no-alert': 0,
 		'no-console': 0,
 		'no-plusplus': 0,
-		'no-multi-assign': 0
+		'no-multi-assign': 0,
+		'global-require': 0,
+		'camelcase': 0
 	}
 }

@@ -1,13 +1,80 @@
-/* 工具库 by JXL */
+/*
+	工具库 for jiuhongjinfu
+	@author JXL 469810199@qq.com 2017/11/16
+*/
 
-const tools =  {
+/* global ActiveXObject */
+
+const tools = {
 	/* 替代eval */
 	evil(fn) {
 		const Fn = Function;
 		return new Fn(`return ${fn}`)();
 	},
 
-	/* 添加Cookie $.addCookie("xxx","123",{expires:5});保存5秒 */
+	doms(txt) {
+		if (txt instanceof HTMLElement) {
+			return [txt];
+		} else if ((typeof txt != 'string') && txt.length > 0) {
+			return txt;
+		}
+		let dom;
+		try {
+			dom = new ActiveXObject('Microsoft.XMLDOM');
+			dom.async = 'false';
+			dom.loadXML(txt);
+		} catch (e) {
+			try {
+				dom = new DOMParser().parseFromString(txt, 'text/html');
+			} catch (error) {
+				console.error(error);
+			}
+		}
+		const x = [];
+		const y = [];
+		let a = dom.head.childNodes;
+		let b = dom.body.childNodes;
+		for (let i = 0; i < a.length; i++) {
+			x.push(a[i]);
+		}
+		for (let j = 0; j < b.length; j++) {
+			y.push(b[j]);
+		}
+		dom = null; a = null; b = null;
+		return x.concat(y);
+	},
+
+	ajax(opt = {}) {
+		opt.method = opt.method ? opt.method.toUpperCase() : 'POST';
+		opt.url = opt.url || '';
+		opt.async = opt.async || true;
+		opt.data = opt.data || null;
+		opt.success = opt.success || function () {};
+		opt.error = opt.error || function () {};
+		const xmlHttp = new XMLHttpRequest();
+		const params = [];
+		Object.getOwnPropertyNames(opt.data).forEach((key) => {
+			params.push(`${key}=${opt.data[key]}`);
+		});
+		const postData = params.join('&');
+		if (opt.method.toUpperCase() === 'POST') {
+			xmlHttp.open(opt.method, opt.url, opt.async);
+			xmlHttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=utf-8');
+			xmlHttp.send(postData);
+		} else if (opt.method.toUpperCase() === 'GET') {
+			xmlHttp.open(opt.method, `${opt.url}?${postData}`, opt.async);
+			xmlHttp.send(null);
+		}
+		xmlHttp.onreadystatechange = function () {
+			if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
+				opt.success(xmlHttp.responseText);
+			} else {
+				opt.error(xmlHttp.responseText);
+			}
+		};
+	},
+
+	/* 添加Cookie addCookie("xxx","123",{expires:5});保存5秒 */
 	addCookie(name, value, options) {
 		if (arguments.length > 1 && name != null) {
 			if (options == null) {
@@ -43,6 +110,54 @@ const tools =  {
 		this.addCookie(name, null, options);
 	},
 
+	compressImg() {
+	},
+
+	adjustImg(url, kbs) {
+		const quality = ((1 === 0) && kbs != null && kbs > 1024) ? (1024 / kbs) : 1;
+		// 图片大于1M，判断是否需要压缩
+		let img = document.createElement('IMG');
+		img.onload = function () {
+			// IOS 设备中，如果的照片是竖屏拍摄的，虽然实际在网页中显示出的方向也是垂直，但图片数据依然是以横屏方向展示
+			const naturalWidth = this.naturalWidth; // 在没有加入文档前，可以通过原生属性来读取
+			document.body.appendChild(img);
+			const realityHeight = this.naturalHeight;
+			document.body.removeChild(img);
+			img = null;
+			let angleOffset = 0;
+			if (naturalWidth === realityHeight) {
+				angleOffset = 90;
+			}
+			// 将图片进行调整
+			img.src = this.compressImg(this, quality, angleOffset, null);
+		};
+		img.src = url;
+	},
+
+	preUpload({ load = () => { }, multiple = 'true', accept = 'image/jpg,image/jpeg,image/png,image/gif,image/tiff,image/bmp' }) {
+		const input = document.createElement('INPUT');
+		input.type = 'file';
+		input.accept = accept;
+		input.multiple = multiple;
+		input.onchange = function (event) {
+			const files = Array.from(this.files || event.target.files || event.dataTransfer.files);
+			files.forEach((file) => {
+				const fileReader = new FileReader();
+				fileReader.onprogress = () => {
+					/* console.log(`${file.name}/${file.type}:${(e.loaded / e.total * 100).toFixed()}%`); */
+				};
+				fileReader.onload = function () {
+					load(this.result, file);
+					// this.adjustImg(this.result, e.total / 1024);
+				};
+				fileReader.onerror = () => {
+				};
+				fileReader.readAsDataURL(file);
+			});
+		};
+		input.click();
+	},
+
 	/* 上传 */
 	upload(option = {
 		/* 以下为默认值 */
@@ -63,6 +178,7 @@ const tools =  {
 		},
 		log: false				/* 打印日志 */
 	}) {
+		const $root = this;
 		const input = document.createElement('INPUT');
 		input.type = 'file';
 		input.accept = option.accept;
@@ -72,9 +188,9 @@ const tools =  {
 			function saveImg(data) {
 				option.load(data);
 				if (option.url) {
-					$.ajax({
+					$root.ajax({
 						url: option.url,
-						data: Object.assign(option.data, this.evil(`({${option.fileUrl}:data})`)()),
+						data: Object.assign(option.data, $root.evil(`({${option.fileUrl}:data})`)()),
 						async: false,
 						type: option.type,
 						success(res) {
@@ -96,7 +212,7 @@ const tools =  {
 			const data = new FormData();
 			let over = false;
 			for (let i = 0; i < files.length; i++) {
-				if (option.size == null || files[i].size <= this.sizeToBytes(option.size)) {
+				if (option.size == null || files[i].size <= $root.sizeToBytes(option.size)) {
 					data.append('files', files[i]);
 				} else {
 					over = true;
@@ -109,7 +225,12 @@ const tools =  {
 			xhr.addEventListener('load', function () {
 				// log(this.file.name);
 				if (over) alert(`超过${option.size}的文件未上传`);
-				const res = JSON.parse(this.responseText);
+				let res = {}
+				try {
+					res = JSON.parse(this.responseText);
+				} catch (error) {
+					console.error(error);
+				}
 				log('SimpleUpload load:');
 				log(res);
 				saveImg(res);
@@ -119,7 +240,7 @@ const tools =  {
 				log(this.responseText);
 			}, false);
 			xhr.open('POST', 'file/upload.shtml', true);
-			xhr.setRequestHeader('token', this.getCookie('token'));
+			xhr.setRequestHeader('token', $root.getCookie('token'));
 			xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 			xhr.send(data);
 		};
@@ -154,4 +275,6 @@ const tools =  {
 		}
 		return parseFloat(size);
 	}
-}
+};
+
+export default tools;

@@ -1,14 +1,22 @@
 <template>
 	<div class="unit">
-		<img src="static/img/transparent_1x1.gif"/>
-		<div class="content" v-if="index<=length+1" @click="upload">
-			<img v-if="item && item.img" :src="item.img"/>
-			<template v-else><div class="add">+</div><sub>上传照片</sub></template>
+		<img src="~_A/img/trans_1x1.gif"/>
+		<div class="content" v-if="index<=length+1">
+			<template v-if="item">
+				<img class="cover" :src="item" @click="change"/>
+				<input :value="item" type="hidden"/>
+			</template>
+			<template v-else>
+				<div class="add" @click="add">+</div>
+				<sub>上传照片</sub>
+			</template>
 		</div>
 	</div>
 </template>
 
 <script>
+	import _2s from '_A/js/2s';
+
 	export default {
 		name: 'UploadItem',
 		props: [
@@ -17,7 +25,20 @@
 			'length'
 		],
 		methods: {
-			upload() {
+			add() {
+				_2s.preUpload({
+					load: (src, file) => {
+						this.$emit('add_item', src, file);
+					}
+				});
+			},
+			change() {
+				_2s.preUpload({
+					load: (src, file) => {
+						this.$emit('update:item', src, file);
+					},
+					multiple: false
+				});
 			}
 		}
 	}

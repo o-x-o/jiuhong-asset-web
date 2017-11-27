@@ -4,11 +4,11 @@
 	<div class="padding-bar-bottom">
 		<mu-list class="demo-list">
 			<mu-list-item title="贷款人姓名" @click="focus">
-				<mu-text-field hintText="请输入贷款人姓名" v-model="lenderName" :underlineShow="false" required/>
+				<mu-text-field hintText="请输入贷款人姓名" v-model.trim="lenderName" :underlineShow="false" required/>
 			</mu-list-item>
 			<mu-divider/>
 			<mu-list-item title="身份证号" @click="focus">
-				<mu-text-field hintText="请输入贷款人身份证号" v-model="lenderID" :underlineShow="false" required/>
+				<mu-text-field hintText="请输入贷款人身份证号" v-model.trim="lenderID" :underlineShow="false" required/>
 			</mu-list-item>
 			<mu-divider/>
 			<mu-list-item title="抵押类型">
@@ -21,7 +21,7 @@
 		<mu-card>
 			<mu-card-header title="请上传房产证照片（最多6张）"/>
 			<mu-card-text>
-				<upload-array/>
+				<upload-array :items="certificates"/>
 			</mu-card-text>
 		</mu-card>
 
@@ -37,8 +37,8 @@
 </template>
 
 <script>
-import BottomButton from '@/components/BottomButton';
-import UploadArray from '@/components/UploadArray';
+import BottomButton from '_C/BottomButton';
+import UploadArray from '_C/UploadArray';
 
 export default {
 	name: 'Declaration',
@@ -46,12 +46,21 @@ export default {
 		return {
 			lenderName: '',
 			lenderID: '',
-			lenderType: ''
+			lenderType: '',
+			certificates: [
+				require('_A/img/logo-9red-sq-200.png'),
+				require('_A/img/logo-9red-sq-200.png'),
+				require('_A/img/logo-9red-sq-200.png'),
+				require('_A/img/logo-9red-sq-200.png')
+			]
 		}
 	},
 	methods: {
 		focus(e) {
 			e.currentTarget.querySelector('input').focus();
+		},
+		add_item(item) {
+			this.certificates.push(item);
 		}
 	},
 	created() {

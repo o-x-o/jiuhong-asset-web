@@ -2,19 +2,33 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue';
 import { mapMutations } from 'vuex';
-
 import MuseUI from 'muse-ui';
 import 'muse-ui/dist/muse-ui.css';
-import './assets/css/muse-ui-theme.less';
-import './assets/css/base.scss';
 
-import App from './App';
-import store from './store';
-import router from './router';
+import { path } from '@/config/vars';
+import '_A/css/muse-ui-theme.less';
+import '_A/css/base.scss';
+
+import App from '@/App';
+import store from '@/store';
+import router from '@/router';
 
 Vue.use(MuseUI);
 
 Vue.config.productionTip = false;
+
+/* 全局变量 global是node里的全局变量 不是window */
+Object.defineProperty(global, '$path', { value: path });
+
+Vue.directive('focus', {
+	inserted(el, binding) {
+		if (binding.arg !== undefined) {
+			el.querySelector(binding.arg).focus();
+		} else {
+			el.focus();
+		}
+	}
+});
 
 /*
 	jxl todo
