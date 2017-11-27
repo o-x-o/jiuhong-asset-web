@@ -80,6 +80,7 @@ module.exports = {
 		'no-plusplus': 0,
 		'no-multi-assign': 0,
 		'global-require': 0,
-		'camelcase': 0
+		'camelcase': 0,
+		'linebreak-style': 0
 	}
 }
